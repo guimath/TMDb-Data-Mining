@@ -46,39 +46,49 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf'):
         big_comp[5] : {"r": 233, "g": 40, "b": 40},
         'Other'     : {"r": 200, "g": 200, "b": 200},
     }
-    colors, size = [], []
-
+    
+    # only keep actors with at least 3 movies
+    distinct = []
+    for i, act in enumerate(OHE_cast.columns) : 
+        if OHE_cast[act].sum()>2:
+            distinct.append(act)
+    
+    # only keep actors with at least 2 connections
+    OHE_cast= OHE_cast[distinct]
     OHE_cast_n = OHE_cast.to_numpy()
     distinct = []
     for i, act in enumerate(OHE_cast.columns) : 
         link_num = np.sum([OHE_cast_n[:,i]&OHE_cast_n[:,j] for j in range(len(OHE_cast.columns)) if i != j])
-        if link_num>5 and OHE_cast[act].sum()>2:
+        if link_num>5 :
             distinct.append(act)
-            graph.add_node(act)
 
-            _d = OHE_comp.iloc[np.where(OHE_cast[act]!=0)].sum()
-            if _d.max() < 1:
-                cat_comp = 'Other'
-            else:
-                cat_comp = _d.idxmax()
-            colors.append(cat_comp)
-            size.append(df['revenue'].values[np.where(OHE_cast[act] !=0)].mean())
-        else :
-            OHE_cast_n[:,i] =OHE_cast_n[:,i]*0 
-    OHE_cast = OHE_cast[distinct]
-    OHE_cast_n = OHE_cast.to_numpy()
 
+    # creating nodes and compute size & color
+    category, size = [], []
+    for i, act in enumerate(OHE_cast.columns) : 
+        graph.add_node(act)
+        _d = OHE_comp.iloc[np.where(OHE_cast[act]!=0)].sum()
+        if _d.max() < 1:
+            cat = 'Other'
+        else:
+            cat = _d.idxmax()
+        category.append(cat)
+        size.append(df['revenue'].values[np.where(OHE_cast[act] !=0)].mean())
+
+    # size norm between 20 and 420
     size = np.array(size)
     min_r, max_r = size.min(), size.max()
-    delta = max_r - min_r
-    size = (((size-min_r)/delta) * 400) +20
+    size = (((size-min_r)/(max_r - min_r)) * 400) + 20
+
+    # adding size & color attributes to nodes
     for i, name in enumerate(graph.nodes.keys()):
         graph.nodes[name]["viz"] = {
             'size': int(size[i]),
-            'color': COLOR[colors[i]]                  
+            'color': COLOR[category[i]]                  
         }
 
     # Edges computing
+    OHE_cast_n = OHE_cast.to_numpy()
     for i in range(len(distinct)):
         for j in range(i+1, len(distinct)):
             combined = OHE_cast_n[:,i]& OHE_cast_n[:,j]
