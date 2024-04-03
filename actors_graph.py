@@ -108,7 +108,8 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf', color_by_category='genre
     clrs = []
     for cat in big_cat: 
         clrs.append((COLOR[cat]['r']/255, COLOR[cat]['g']/255, COLOR[cat]['b']/255))#
-    colors = ["crimson", "purple", "gold"]
+
+    # code taken from https://stackoverflow.com/questions/4534480/get-legend-as-a-separate-picture-in-matplotlib    
     f = lambda m,c: plt.plot([],[],marker=m, color=c, ls="none")[0]
 
     handles = [f("s", clrs[i]) for i in range(len(big_cat))]
@@ -116,7 +117,7 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf', color_by_category='genre
     fig  = legend.figure
     fig.canvas.draw()
     bbox  = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-    fig.savefig('legend', dpi="figure", bbox_inches=bbox)
+    fig.savefig('legend', dpi=1000, bbox_inches=bbox)
 
 if __name__ == '__main__':
     make_gexf('data/TMBD Movie Dataset.csv')
