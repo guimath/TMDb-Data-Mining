@@ -1,5 +1,5 @@
 import networkx as nx
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
@@ -9,10 +9,10 @@ def onehotencode(dataset,col):
     one_hot_encoded = pd.get_dummies(_df[col].apply(pd.Series).stack()).groupby(level=0).sum()
     return one_hot_encoded
 
-def make_gexf(csv_file, gexf_file= 'actors_graph.gexf'):
+def make_gexf(csv_file, gexf_file= 'actors_graph.gexf', color_by_category='genres'): # color_by_category='production_companies'
     with open(csv_file, encoding='utf-8') as f:
         df1 = pd.read_csv(f) # CSV not in utf8 ?
-    df = df1[['revenue', 'cast', 'original_title', 'director', 'production_companies']]
+    df = df1[['revenue', 'cast', 'original_title', 'director', color_by_category]]
     df = df.loc[df['revenue']>1e7]
     n_movie= df.shape[0]
 
@@ -25,27 +25,26 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf'):
     graph = nx.Graph()
 
     # GETTING BIGGEST COMPANIES
-    OHE_comp  = onehotencode(df, 'production_companies')
-    comps = OHE_comp.columns
-    num = np.zeros(len(comps))
-    for i, comp in enumerate(comps) : 
-        num[i] = OHE_comp[comp].sum()
+    OHE_cat  = onehotencode(df, color_by_category)
+    cats = OHE_cat.columns
+    num = np.zeros(len(cats))
+    for i, cat in enumerate(cats) : 
+        num[i] = OHE_cat[cat].sum()
 
     idx = np.argsort(num,axis=0)
-    big_comp = comps[idx[-6:]]
-    OHE_comp = OHE_comp[big_comp]
+    big_cat = cats[idx[-6:]]
+    OHE_cat = OHE_cat[big_cat]
 
-    print(list(zip(big_comp, ['Violet', 'blue', 'cyan', 'green', 'yellow', 'red'])))
-    print('(Other, grey)')
     COLOR = {
-        big_comp[0] : {"r": 88, "g": 58, "b": 113},
-        big_comp[1] : {"r": 97, "g": 132, "b": 216},
-        big_comp[2] : {"r": 80, "g": 197, "b": 183},
-        big_comp[3] : {"r": 156, "g": 236, "b": 91},
-        big_comp[4] : {"r": 240, "g": 244, "b": 101},
-        big_comp[5] : {"r": 233, "g": 40, "b": 40},
+        big_cat[0] : {"r": 88, "g": 58, "b": 113},
+        big_cat[1] : {"r": 97, "g": 132, "b": 216},
+        big_cat[2] : {"r": 80, "g": 197, "b": 183},
+        big_cat[3] : {"r": 156, "g": 236, "b": 91},
+        big_cat[4] : {"r": 240, "g": 244, "b": 101},
+        big_cat[5] : {"r": 233, "g": 40, "b": 40},
         'Other'     : {"r": 200, "g": 200, "b": 200},
     }
+    
     
     # only keep actors with at least 3 movies
     distinct = []
@@ -61,13 +60,13 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf'):
         link_num = np.sum([OHE_cast_n[:,i]&OHE_cast_n[:,j] for j in range(len(OHE_cast.columns)) if i != j])
         if link_num>5 :
             distinct.append(act)
-
+    OHE_cast = OHE_cast[distinct]
 
     # creating nodes and compute size & color
     category, size = [], []
     for i, act in enumerate(OHE_cast.columns) : 
         graph.add_node(act)
-        _d = OHE_comp.iloc[np.where(OHE_cast[act]!=0)].sum()
+        _d = OHE_cat.iloc[np.where(OHE_cast[act]!=0)].sum()
         if _d.max() < 1:
             cat = 'Other'
         else:
@@ -94,14 +93,30 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf'):
             combined = OHE_cast_n[:,i]& OHE_cast_n[:,j]
             weight = combined.sum()
             if weight > 0 : 
-                # edge label is list of all shared movies 
-                label = str(movies[np.where(combined==1)].tolist()).replace('[', '').replace(']', '').replace('\'', '') 
+                # edge label is list of all shared movies
+                label = str(movies[np.where(combined==1)].tolist()).replace('[', '').replace(']', '').replace('\'', '').replace('"', '') 
                 # print(f'{distinct[i]:23s} -> {distinct[j]:23s} ({label}) {weight}')
                 graph.add_edge(distinct[i], distinct[j], weight=int(3**(weight-1)), label=label)
     
     # save as gexf for gephi processing
     nx.write_gexf(graph, gexf_file)
     print(f'{gexf_file} saved')
+
+    # save legend
+    big_cat = list(big_cat)
+    big_cat.append('Other')
+    clrs = []
+    for cat in big_cat: 
+        clrs.append((COLOR[cat]['r']/255, COLOR[cat]['g']/255, COLOR[cat]['b']/255))#
+    colors = ["crimson", "purple", "gold"]
+    f = lambda m,c: plt.plot([],[],marker=m, color=c, ls="none")[0]
+
+    handles = [f("s", clrs[i]) for i in range(len(big_cat))]
+    legend = plt.legend(handles, big_cat, loc=3, framealpha=1, frameon=False)
+    fig  = legend.figure
+    fig.canvas.draw()
+    bbox  = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig('legend', dpi="figure", bbox_inches=bbox)
 
 if __name__ == '__main__':
     make_gexf('data/TMBD Movie Dataset.csv')
