@@ -18,5 +18,5 @@ All python libs used are in [requirements.txt](requirements.txt).
 | start.py | Download dataset from kaggle |
 
 
-
+For more information about the project see the [project report](project_report.pdf)
 
