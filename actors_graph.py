@@ -72,7 +72,7 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf', color_by_category='genre
         else:
             cat = _d.idxmax()
         category.append(cat)
-        size.append(df['revenue'].values[np.where(OHE_cast[act] !=0)].mean())
+        size.append(df['revenue'].values[np.where(OHE_cast[act] !=0)].sum())
 
     # size norm between 20 and 420
     size = np.array(size)
@@ -117,7 +117,7 @@ def make_gexf(csv_file, gexf_file= 'actors_graph.gexf', color_by_category='genre
     fig  = legend.figure
     fig.canvas.draw()
     bbox  = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-    fig.savefig('legend', dpi=1000, bbox_inches=bbox)
+    fig.savefig('images/legend.png', dpi=500, bbox_inches=bbox)
 
 if __name__ == '__main__':
     make_gexf('data/TMBD Movie Dataset.csv')
