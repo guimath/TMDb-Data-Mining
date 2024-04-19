@@ -1,0 +1,8 @@
+&Target&Avg&Type&Score&OLS&BL&Type&Score&OLS&BL
+0&$profit\_groups$&1.56e+00&\textbf{Ada}$^\dag$&7.88e-01&9.95e-01&1.21e+00&\textbf{Ada}$^\dag$&1.00e+00&1.00e+00&1.00e+00
+1&$profit\_part\_budget$&4.42e+01&\textbf{DTs}$^\dag$&5.36e+02&8.37e+03&3.03e+03&\textbf{DTs}$^\dag$&1.54e+00&6.57e+01&4.92e+01
+2&$revenue\_adj$&1.99e+08&\textbf{KN}$^\dag$&4.21e+16&5.47e+16&8.92e+16&\textbf{KN}$^\dag$&6.02e+07&6.17e+07&1.58e+08
+3&$revenue$&1.76e+08&\textbf{KN}$^\dag$&4.86e+16&5.32e+16&1.09e+17&\textbf{Ada}$^\dag$&4.24e+07&5.80e+07&1.33e+08
+4&$vote\_count$&9.48e+02&\textbf{OLS}$^\dag$&1.05e+06&1.05e+06&2.22e+06&\textbf{OLS}$^\dag$&3.83e+02&3.83e+02&6.65e+02
+5&$vote\_average$&6.28e+00&\textbf{RFs}$^\dag$&6.43e-01&6.91e-01&7.82e-01&\textbf{DTs}$^\dag$&5.49e-01&6.22e-01&6.48e-01
+6&$popularity$&1.79e+00&\textbf{Ada}$^\dag$&1.75e+01&1.85e+01&2.13e+01&\textbf{Ada}$^\dag$&9.09e-01&1.06e+00&1.07e+00
