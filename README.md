@@ -13,7 +13,8 @@ All python libs used are in [requirements.txt](requirements.txt).
 |-|-|
 | TMDB Movie Dataset.csv  | Processed data set |
 | Movie_analysis.ipynb | Preprocessing, data visualisation & regression notebook |
-| Tree_based_classification.ipynb | Regression notebook |
+| preprocess_and_split_dataset.ipynb | Simplified version of notebook Movie_analysis.ipynb to automatically split the dataset while respecting the release date for a chosen train/testratio |
+| regression_classification.ipynb | K-means++ clustering, regression, prediction, feature importance analysis and split ratio influence evaluation with a comparative study between different models |
 | actors_graph.py | Graph structure extraction |
 | start.py | Download dataset from kaggle |
 
